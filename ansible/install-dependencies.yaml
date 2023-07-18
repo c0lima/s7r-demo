@@ -43,25 +43,25 @@
 
     - name: Download Kafka
       get_url:
-        url: "http://apache.mirrors.hoobly.com/kafka/2.8.0/kafka_2.13-2.8.0.tgz"
-        dest: "/opt/kafka_2.13-2.8.0.tgz"
+        url: "https://downloads.apache.org/kafka/3.5.0/kafka-3.5.0-src.tgz"
+        dest: "/opt/kafka-3.5.0-src.tgz"
         mode: '0755'
 
     - name: Extract Kafka
       unarchive:
-        src: "/opt/kafka_2.13-2.8.0.tgz"
+        src: "/opt/kafka-3.5.0-src.tgz"
         dest: "/opt"
         remote_src: true
 
     - name: Setup single node Kafka with Kraft
       shell:
         cmd: |
-          cd /opt/kafka_2.13-2.8.0
+          cd /opt/kafka-3.5.0-src
           bin/kafka-storage.sh random-uuid
           bin/kafka-server-start.sh config/kraft/server.properties &
           sleep 10
-        creates: /opt/kafka_2.13-2.8.0/config/kraft/server.properties
+        creates: /opt/kafka-3.5.0-src/config/kraft/server.properties
 
     - name: Create Kafka topic
-      command: "/opt/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092"
+      command: "/opt/kafka-3.5.0-src/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092"
       ignore_errors: yes # Ignore errors if topic already exists
