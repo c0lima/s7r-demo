@@ -27,9 +27,7 @@
         warn: no
 
     - name: Download MySQL repo
-      get_url:
-        url: https://dev.mysql.com/get/mysql80-community-release-el8-6.noarch.rpm
-        dest: "/tmp/mysql80-community-release-el8-6.noarch.rpm"
+      command: wget https://dev.mysql.com/get/mysql80-community-release-el8-6.noarch.rpm -O /tmp/mysql80-community-release-el8-6.noarch.rpm
 
     - name: Install MySQL repo
       yum:
