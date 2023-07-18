@@ -15,8 +15,8 @@
     - name: Install Elastic repo
       yum_repository:
         name: elastic-8.x
-        description: Elastic repository for 8.3 packages
-        baseurl: https://artifacts.elastic.co/packages/8.3/yum
+        description: Elastic repository for 8.x packages
+        baseurl: https://artifacts.elastic.co/packages/8.x/yum
         gpgcheck: yes
         gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
         enabled: yes
