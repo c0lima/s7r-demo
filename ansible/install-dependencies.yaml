@@ -13,7 +13,6 @@
         name: wget
         state: present
 
-
     - name: Install Elastic repo
       yum_repository:
         name: elastic-8.x
@@ -22,12 +21,6 @@
         gpgcheck: yes
         gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
         enabled: yes
-
-    - name: Download and extract Kafka
-      unarchive:
-        src: http://apache.mirrors.hoobly.com/kafka/2.8.0/kafka_2.13-2.8.0.tgz
-        dest: /opt
-        remote_src: true
 
     - name: Install Logstash
       yum:
@@ -52,3 +45,39 @@
           tar xzvf elastic-agent-8.3.0-linux-x86_64.tar.gz
           cd elastic-agent-8.3.0-linux-x86_64
           ./elastic-agent install
+
+
+---
+- name: Kafka Quickstart with Kraft and Log generator
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Download Kafka
+      get_url:
+        url: "http://apache.mirrors.hoobly.com/kafka/2.8.0/kafka_2.13-2.8.0.tgz"
+        dest: "/opt/kafka_2.13-2.8.0.tgz"
+        mode: '0755'
+
+    - name: Extract Kafka
+      unarchive:
+        src: "/opt/kafka_2.13-2.8.0.tgz"
+        dest: "/opt"
+        remote_src: true
+
+    - name: Setup single node Kafka with Kraft
+      shell:
+        cmd: |
+          cd /opt/kafka_2.13-2.8.0
+          bin/kafka-storage.sh random-uuid
+          bin/kafka-server-start.sh config/kraft/server.properties &
+          sleep 10
+        creates: /opt/kafka_2.13-2.8.0/config/kraft/server.properties
+
+    - name: Create Kafka topic
+      command: "/opt/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092"
+      ignore_errors: yes # Ignore errors if topic already exists
+
+    - name: Run Python Log generator
+      shell: 
+        cmd: |
+          python /path/to/your/log_generator.py &
