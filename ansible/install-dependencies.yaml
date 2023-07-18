@@ -40,28 +40,18 @@
           ./elastic-agent install -n
       ignore_errors: true
 
+- name: Download Kafka binary
+  get_url:
+    url: https://downloads.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
+    dest: /opt/kafka_2.13-3.5.0.tgz
 
-    - name: Download Kafka
-      get_url:
-        url: "https://downloads.apache.org/kafka/3.5.0/kafka-3.5.0-src.tgz"
-        dest: "/opt/kafka-3.5.0-src.tgz"
-        mode: '0755'
+- name: Extract Kafka binary
+  unarchive:
+    src: /opt/kafka_2.13-3.5.0.tgz
+    dest: /opt/
+    remote_src: true
 
-    - name: Extract Kafka
-      unarchive:
-        src: "/opt/kafka-3.5.0-src.tgz"
-        dest: "/opt"
-        remote_src: true
-
-    - name: Setup single node Kafka with Kraft
-      shell:
-        cmd: |
-          cd /opt/kafka-3.5.0-src
-          bin/kafka-storage.sh random-uuid
-          bin/kafka-server-start.sh config/kraft/server.properties &
-          sleep 10
-        creates: /opt/kafka-3.5.0-src/config/kraft/server.properties
-
-    - name: Create Kafka topic
-      command: "/opt/kafka-3.5.0-src/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092"
-      ignore_errors: yes # Ignore errors if topic already exists
+- name: Create Kafka topic
+  command:
+    cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+  ignore_errors: true
