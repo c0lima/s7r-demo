@@ -14,17 +14,17 @@
 
     - name: Install Elastic repo
       yum_repository:
-        name: elastic-8.3
-        description: Elastic repository for 8.3 packages
-        baseurl: https://artifacts.elastic.co/packages/8.3/yum
+        name: elastic-8.x
+        description: Elastic repository for 8.x packages
+        baseurl: https://artifacts.elastic.co/packages/8.x/yum
         gpgcheck: yes
         gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-        enabled: yes
+        enabled: no
 
     - name: Install Logstash
-      yum:
-        name: logstash
-        state: present
+      command:
+        cmd: yum install --enablerepo=elastic-8.x logstash -y
+        warn: no
 
     - name: Add MySQL repo
       yum:
