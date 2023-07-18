@@ -26,14 +26,15 @@
         cmd: yum install --enablerepo=elastic-8.x logstash -y
         warn: no
 
-    - name: Add MySQL repo
-      yum:
-        name: https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
-        state: present
+    - name: Download MySQL repo
+      get_url:
+        url: https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
+        dest: /tmp/mysql80-community-release-el8-1.noarch.rpm
+        mode: '0755'
 
-    - name: Install MySQL
+    - name: Install MySQL repo
       yum:
-        name: mysql-community-server
+        name: /tmp/mysql80-community-release-el8-1.noarch.rpm
         state: present
 
         
