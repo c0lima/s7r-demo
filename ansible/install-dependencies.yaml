@@ -52,14 +52,13 @@
         remote_src: true
 
     - name: Start Kafka
-      shell:
-        cmd: |
-          cd /opt/kafka_2.13-3.5.0/
-          bin/kafka-server-start.sh config/server.properties &
-        args:
-          executable: /bin/bash
+      shell: |
+        bin/kafka-server-start.sh config/server.properties &
+      args:
+        chdir: /opt/kafka_2.13-3.5.0/
       async: 45
       poll: 5
+
 
     - name: Create Kafka topic
       command:
