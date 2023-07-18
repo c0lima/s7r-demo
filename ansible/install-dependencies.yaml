@@ -33,6 +33,7 @@
       yum:
         name: /tmp/mysql80-community-release-el8-6.noarch.rpm
         state: present
+        disable_gpg_check: yes  # Disable GPG signature check
 
     - name: Install MySQL
       yum:
