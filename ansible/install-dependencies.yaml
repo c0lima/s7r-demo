@@ -57,7 +57,7 @@
         cmd: |
           KAFKA_CLUSTER_ID="$(/opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid)"
           /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /opt/kafka_2.13-3.5.0/config/kraft/server.properties --ignore-formatted
-          /opt/kafka_2.13-3.5.0/bin/kafka-server-start.sh /opt/kafka_2.13-3.5.0/config/kraft/server.properties
+          /opt/kafka_2.13-3.5.0/bin/kafka-server-start.sh /opt/kafka_2.13-3.5.0/config/kraft/server.properties &
 
 
     - name: Wait for Kafka to start
