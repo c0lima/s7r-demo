@@ -37,7 +37,7 @@
           curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.3.0-linux-x86_64.tar.gz
           tar xzvf elastic-agent-8.3.0-linux-x86_64.tar.gz
           cd elastic-agent-8.3.0-linux-x86_64
-          ./elastic-agent install
+          ./elastic-agent install -y
 
     - name: Download Kafka
       get_url:
