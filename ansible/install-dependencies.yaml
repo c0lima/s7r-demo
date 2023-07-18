@@ -38,8 +38,7 @@
           tar xzvf elastic-agent-8.3.0-linux-x86_64.tar.gz
           cd elastic-agent-8.3.0-linux-x86_64
           ./elastic-agent install -n
-        warn: false
-        ignore_errors: true
+      ignore_errors: true
 
 
     - name: Download Kafka
