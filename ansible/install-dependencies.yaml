@@ -59,6 +59,13 @@
       async: 45
       poll: 5
 
+    - name: Wait for Kafka to start
+      wait_for:
+        host: localhost
+        port: 9092
+        delay: 10
+        timeout: 300
+
 
     - name: Create Kafka topic
       command:
