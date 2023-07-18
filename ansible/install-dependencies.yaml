@@ -28,15 +28,18 @@
 
     - name: Download MySQL repo
       get_url:
-        url: https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
-        dest: /tmp/mysql80-community-release-el8-1.noarch.rpm
-        mode: '0755'
+        url: https://dev.mysql.com/get/mysql80-community-release-el8-6.noarch.rpm
+        dest: "/tmp/mysql80-community-release-el8-6.noarch.rpm"
 
     - name: Install MySQL repo
       yum:
-        name: /tmp/mysql80-community-release-el8-1.noarch.rpm
+        name: /tmp/mysql80-community-release-el8-6.noarch.rpm
         state: present
 
+    - name: Install MySQL
+      yum:
+        name: mysql-community-server
+        state: present
         
     - name: Install Elastic Agent
       shell:
