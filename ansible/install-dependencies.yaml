@@ -1,0 +1,54 @@
+---
+- name: Install software
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install Java
+      yum:
+        name: java-11-openjdk
+        state: present
+
+    - name: Install wget
+      yum:
+        name: wget
+        state: present
+
+
+    - name: Install Elastic repo
+      yum_repository:
+        name: elastic-8.x
+        description: Elastic repository for 8.3 packages
+        baseurl: https://artifacts.elastic.co/packages/8.3/yum
+        gpgcheck: yes
+        gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        enabled: yes
+
+    - name: Download and extract Kafka
+      unarchive:
+        src: http://apache.mirrors.hoobly.com/kafka/2.8.0/kafka_2.13-2.8.0.tgz
+        dest: /opt
+        remote_src: true
+
+    - name: Install Logstash
+      yum:
+        name: logstash
+        state: present
+
+    - name: Add MySQL repo
+      yum:
+        name: https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
+        state: present
+
+    - name: Install MySQL
+      yum:
+        name: mysql-community-server
+        state: present
+
+        
+    - name: Install Elastic Agent
+      shell:
+        cmd: |
+          curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.3.0-linux-x86_64.tar.gz
+          tar xzvf elastic-agent-8.3.0-linux-x86_64.tar.gz
+          cd elastic-agent-8.3.0-linux-x86_64
+          ./elastic-agent install
