@@ -26,20 +26,11 @@
         cmd: yum install --enablerepo=elastic-8.x logstash -y
         warn: no
 
-    - name: Download MySQL repo
-      command: wget https://dev.mysql.com/get/mysql80-community-release-el8-6.noarch.rpm -O /tmp/mysql80-community-release-el8-6.noarch.rpm
-
-    - name: Install MySQL repo
+    - name: Install MariaDB
       yum:
-        name: /tmp/mysql80-community-release-el8-6.noarch.rpm
+        name: mariadb-server
         state: present
-        disable_gpg_check: yes  # Disable GPG signature check
 
-    - name: Install MySQL
-      yum:
-        name: mysql-community-server
-        state: present
-        
     - name: Install Elastic Agent
       shell:
         cmd: |
