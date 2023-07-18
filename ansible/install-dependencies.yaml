@@ -51,6 +51,16 @@
         dest: /opt/
         remote_src: true
 
+    - name: Start Kafka
+      shell:
+        cmd: |
+          cd /opt/kafka_2.13-3.5.0/
+          bin/kafka-server-start.sh config/server.properties &
+        args:
+          executable: /bin/bash
+      async: 45
+      poll: 5
+
     - name: Create Kafka topic
       command:
         cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
