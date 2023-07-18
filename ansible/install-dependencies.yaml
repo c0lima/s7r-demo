@@ -40,18 +40,18 @@
           ./elastic-agent install -n
       ignore_errors: true
 
-- name: Download Kafka binary
-  get_url:
-    url: https://downloads.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
-    dest: /opt/kafka_2.13-3.5.0.tgz
+    - name: Download Kafka binary
+      get_url:
+        url: https://downloads.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
+        dest: /opt/kafka_2.13-3.5.0.tgz
 
-- name: Extract Kafka binary
-  unarchive:
-    src: /opt/kafka_2.13-3.5.0.tgz
-    dest: /opt/
-    remote_src: true
+    - name: Extract Kafka binary
+      unarchive:
+        src: /opt/kafka_2.13-3.5.0.tgz
+        dest: /opt/
+        remote_src: true
 
-- name: Create Kafka topic
-  command:
-    cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
-  ignore_errors: true
+    - name: Create Kafka topic
+      command:
+        cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+      ignore_errors: true
