@@ -1,4 +1,3 @@
----
 - name: Install software
   hosts: localhost
   become: true
@@ -46,12 +45,6 @@
           cd elastic-agent-8.3.0-linux-x86_64
           ./elastic-agent install
 
-
----
-- name: Kafka Quickstart with Kraft and Log generator
-  hosts: localhost
-  become: true
-  tasks:
     - name: Download Kafka
       get_url:
         url: "http://apache.mirrors.hoobly.com/kafka/2.8.0/kafka_2.13-2.8.0.tgz"
@@ -76,8 +69,3 @@
     - name: Create Kafka topic
       command: "/opt/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092"
       ignore_errors: yes # Ignore errors if topic already exists
-
-    - name: Run Python Log generator
-      shell: 
-        cmd: |
-          python /path/to/your/log_generator.py &
