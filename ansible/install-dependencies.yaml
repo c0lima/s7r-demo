@@ -39,6 +39,7 @@
     - name: Install Elastic Agent
       shell:
         cmd: |
+          cd /tmp/
           curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.3.0-linux-x86_64.tar.gz
           tar xzvf elastic-agent-8.3.0-linux-x86_64.tar.gz
           cd elastic-agent-8.3.0-linux-x86_64
@@ -48,12 +49,12 @@
     - name: Download Kafka binary
       get_url:
         url: https://downloads.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
-        dest: /opt/kafka_2.13-3.5.0.tgz
+        dest: /tmp/kafka_2.13-3.5.0.tgz
       when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
 
     - name: Extract Kafka binary
       unarchive:
-        src: /opt/kafka_2.13-3.5.0.tgz
+        src: /tmp/kafka_2.13-3.5.0.tgz
         dest: /opt/
         remote_src: true
       when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
