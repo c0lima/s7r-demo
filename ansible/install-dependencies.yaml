@@ -44,21 +44,50 @@
       get_url:
         url: https://downloads.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
         dest: /opt/kafka_2.13-3.5.0.tgz
+      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
 
     - name: Extract Kafka binary
       unarchive:
         src: /opt/kafka_2.13-3.5.0.tgz
         dest: /opt/
         remote_src: true
+      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
 
+    - name: Set Kafka cluster ID
+      command:
+        cmd: /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid
+      register: kafka_cluster_id_result
+      changed_when: false
+      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
 
-    - name: Start Kafka
-      shell:
-        cmd: |
-          KAFKA_CLUSTER_ID="$(/opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid)"
-          /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /opt/kafka_2.13-3.5.0/config/kraft/server.properties --ignore-formatted
-          /opt/kafka_2.13-3.5.0/bin/kafka-server-start.sh /opt/kafka_2.13-3.5.0/config/kraft/server.properties &
+    - name: Write Kafka systemd service file
+      copy:
+        dest: /etc/systemd/system/kafka.service
+        content: |
+          [Unit]
+          Description=Apache Kafka server
+          After=network.target
 
+          [Service]
+          Type=simple
+          Environment=KAFKA_CLUSTER_ID={{ kafka_cluster_id_result.stdout }}
+          ExecStart=/opt/kafka_2.13-3.5.0/bin/kafka-server-start.sh /opt/kafka_2.13-3.5.0/config/kraft/server.properties
+
+          [Install]
+          WantedBy=multi-user.target
+      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
+
+    - name: Reload systemd
+      command:
+        cmd: systemctl daemon-reload
+      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
+
+    - name: Enable and start Kafka
+      systemd:
+        name: kafka
+        state: started
+        enabled: yes
+      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
 
     - name: Wait for Kafka to start
       wait_for:
@@ -71,3 +100,76 @@
       command:
         cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
       ignore_errors: true
+
+
+    - name: Install software
+      hosts: localhost
+      become: true
+      vars:
+        node_script_path: /tmp/producer.js # Cambia esto a la ruta deseada
+      tasks:
+        - name: Install Node.js
+          yum:
+            name: nodejs
+            state: present
+
+
+    - name: Create producer.js file
+      copy:
+        dest: "{{ node_script_path }}"
+        content: |
+          import { Kafka, logLevel } from "kafkajs";
+          import { IEvent, IUser } from "./model";
+          import { v4 as uuidv4 } from "uuid";
+
+          const kafka = new Kafka({
+            clientId: "random-producer",
+            brokers: ["localhost:9092"],
+            connectionTimeout: 3000,
+          });
+          var randomstring = require("randomstring");
+          const randomMobile = require("random-mobile");
+          const producer = kafka.producer({});
+          const topic = "elastic-test";
+
+          const produce = async () => {
+            await producer.connect();
+            let i = 0;
+
+            setInterval(async () => {
+              var event = {};
+              try {
+                event = {
+                  globalId: uuidv4(),
+                  event: "USER-CREATED",
+                  data: {
+                    id: uuidv4(),
+                    firstName: randomstring.generate(8),
+                    lastName: randomstring.generate(6),
+                    country: "India",
+                    email: randomstring.generate(10) + "@gmail.com",
+                    phoneNumber: randomMobile(),
+                    city: "Hyderabad",
+                    createdAt: new Date(),
+                  } as IUser,
+                } as IEvent;
+                await producer.send({
+                  topic,
+                  acks: 1,
+                  messages: [
+                    {
+                      value: JSON.stringify(event),
+                    },
+                  ],
+                });
+
+                // if the message is written successfully, log it and increment `i`
+                console.log("writes: ", event);
+                i++;
+              } catch (err) {
+                console.error("could not write message " + err);
+              }
+            }, 5000);
+          };
+
+          module.exports = produce;
