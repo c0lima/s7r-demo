@@ -21,6 +21,11 @@
         gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
         enabled: no
 
+    - name: Install NodeJs
+      yum:
+        name: nodejs
+        state: present
+          
     - name: Install Logstash
       command:
         cmd: yum install --enablerepo=elastic-8.x logstash -y
@@ -100,18 +105,6 @@
       command:
         cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
       ignore_errors: true
-
-
-    - name: Install software
-      hosts: localhost
-      become: true
-      vars:
-        node_script_path: /tmp/producer.js # Cambia esto a la ruta deseada
-      tasks:
-        - name: Install Node.js
-          yum:
-            name: nodejs
-            state: present
 
 
     - name: Create producer.js file
