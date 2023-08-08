@@ -121,6 +121,12 @@
         cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
       ignore_errors: true
 
+    - name: Ensure directory exists
+      file:
+        path: /opt/kafka/scripts
+        state: directory
+        mode: '0755'
+      become: yes 
 
     - name: Create producer.js file
       copy:
