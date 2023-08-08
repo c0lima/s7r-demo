@@ -80,7 +80,6 @@
         cmd: /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid
       register: kafka_cluster_id_result
       changed_when: false
-      when: not kafka_directory_stat.stat.exists
 
     - name: Write Kafka systemd service file
       copy:
@@ -97,19 +96,16 @@
 
           [Install]
           WantedBy=multi-user.target
-      when: not kafka_directory_stat.stat.exists
 
     - name: Reload systemd
       command:
         cmd: systemctl daemon-reload
-      when: not kafka_directory_stat.stat.exists
 
     - name: Enable and start Kafka
       systemd:
         name: kafka
         state: started
         enabled: yes
-      when: not kafka_directory_stat.stat.exists
 
     - name: Wait for Kafka to start
       wait_for:
