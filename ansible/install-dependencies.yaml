@@ -76,10 +76,11 @@
       when: not kafka_directory_stat.stat.exists
 
     - name: Set Kafka cluster ID
-      cmd: |
-        KAFKA_CLUSTER_ID="$(/opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid)"
-        echo $KAFKA_CLUSTER_ID
-        /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /opt/kafka_2.13-3.5.0/config/kraft/server.properties --ignore-formatted
+      shell:
+        cmd: |
+          KAFKA_CLUSTER_ID="$(/opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid)"
+          echo $KAFKA_CLUSTER_ID
+          /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /opt/kafka_2.13-3.5.0/config/kraft/server.properties --ignore-formatted
       register: kafka_cluster_id_result
       changed_when: false
 
