@@ -77,7 +77,7 @@
 
     - name: Set Kafka cluster ID
       command:
-        cmd: /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid
+        cmd: /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh format -t $(uuidgen) -c /opt/kafka_2.13-3.5.0/config/kraft/server.properties
       register: kafka_cluster_id_result
       changed_when: false
 
