@@ -24,7 +24,12 @@
     - name: Add Node.js v14.x LTS repository
       shell: |
         curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
-      when: "'nodejs' not in ansible_facts.packages"
+
+    - name: Install NodeJs
+      yum:
+        name: nodejs
+        state: present
+          
 
     - name: Install NodeJs
       yum:
