@@ -128,6 +128,19 @@
         mode: '0755'
       become: yes 
 
+    - name: Install necessary npm packages for producer.js
+      npm:
+        path: /opt/kafka/scripts
+        state: present
+        global: yes
+        name: "{{ item }}"
+      loop:
+        - kafkajs
+        - randomstring
+        - random-mobile
+        - uuid
+
+
     - name: Create producer.js file
       copy:
         dest: "/opt/kafka/scripts/producer.js"
