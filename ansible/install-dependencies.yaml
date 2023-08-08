@@ -57,26 +57,32 @@
         msg: "Elastic Agent is already installed."
       when: elastic_agent_directory.stat.exists
 
+    - name: Check if Kafka binary exists or is a symlink
+      stat:
+        path: /opt/kafka_2.13-3.5.0
+      register: kafka_binary_stat
+
+
     - name: Download Kafka binary
       get_url:
         url: https://downloads.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
         dest: /tmp/kafka_2.13-3.5.0.tgz
-      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
-
+      when: not kafka_binary_stat.stat.exists or (kafka_binary_stat.stat.islnk is defined and kafka_binary_stat.stat.islnk)
+        
     - name: Extract Kafka binary
       unarchive:
         src: /tmp/kafka_2.13-3.5.0.tgz
         dest: /opt/
         remote_src: true
-      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
+      when: not kafka_binary_stat.stat.exists or (kafka_binary_stat.stat.islnk is defined and kafka_binary_stat.stat.islnk)
 
     - name: Set Kafka cluster ID
       command:
         cmd: /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid
       register: kafka_cluster_id_result
       changed_when: false
-      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
-
+      when: not kafka_binary_stat.stat.exists or (kafka_binary_stat.stat.islnk is defined and kafka_binary_stat.stat.islnk)
+        
     - name: Write Kafka systemd service file
       copy:
         dest: /etc/systemd/system/kafka.service
@@ -92,19 +98,19 @@
 
           [Install]
           WantedBy=multi-user.target
-      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
+      when: not kafka_binary_stat.stat.exists or (kafka_binary_stat.stat.islnk is defined and kafka_binary_stat.stat.islnk)
 
     - name: Reload systemd
       command:
         cmd: systemctl daemon-reload
-      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
+      when: not kafka_binary_stat.stat.exists or (kafka_binary_stat.stat.islnk is defined and kafka_binary_stat.stat.islnk)
 
     - name: Enable and start Kafka
       systemd:
         name: kafka
         state: started
         enabled: yes
-      when: not ansible_stat.exists or ansible_stat.islnk is defined and ansible_stat.islnk
+      when: not kafka_binary_stat.stat.exists or (kafka_binary_stat.stat.islnk is defined and kafka_binary_stat.stat.islnk)
 
     - name: Wait for Kafka to start
       wait_for:
