@@ -124,7 +124,7 @@
 
     - name: Create producer.js file
       copy:
-        dest: "{{ node_script_path }}"
+        dest: "/opt/kafka/scripts/producer.js"
         content: |
           import { Kafka, logLevel } from "kafkajs";
           import { IEvent, IUser } from "./model";
