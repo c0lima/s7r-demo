@@ -128,6 +128,17 @@
         mode: '0755'
       become: yes 
 
+    - name: Change to scripts directory
+      command:
+        cmd: cd /opt/kafka/scripts
+
+    - name: Initialize npm project
+      command:
+        cmd: npm init -y
+        chdir: /opt/kafka/scripts
+        creates: /opt/kafka/scripts/package.json
+
+
     - name: Install necessary npm packages for producer.js
       npm:
         path: /opt/kafka/scripts
