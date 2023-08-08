@@ -118,7 +118,7 @@
 
     - name: Create Kafka topic
       command:
-        cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+        cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic elastic-test --bootstrap-server localhost:9092
       ignore_errors: true
 
     - name: Ensure directory exists
