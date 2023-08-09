@@ -167,7 +167,7 @@
         - randomstring
         - random-mobile
         - uuid
-        - @types/node
+        - "@types/node"
         - typescript
 
     - name: Initialize TypeScript project in src directory
