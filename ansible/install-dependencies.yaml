@@ -29,13 +29,24 @@
       yum:
         name: nodejs
         state: present
-          
+    - name: Install TypeScript
+      npm:
+        name: typescript
+        global: yes
 
-    - name: Install NodeJs
-      yum:
-        name: nodejs
-        state: present
-              
+    - name: Initialize TypeScript project
+      command:
+        cmd: tsc --init
+        chdir: /opt/kafka/scripts
+        creates: /opt/kafka/scripts/tsconfig.json
+
+    - name: Modify TypeScript configuration
+      lineinfile:
+        path: /opt/kafka/scripts/tsconfig.json
+        backrefs: yes
+        regexp: '"outDir": "./dist"'
+        line: '"outDir": "./dist"'
+
 
     - name: Install Logstash
       command:
@@ -132,40 +143,73 @@
         cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic elastic-test --bootstrap-server localhost:9092
       ignore_errors: true
 
-    - name: Ensure directory exists
+    - name: Ensure directory exists for src
       file:
-        path: /opt/kafka/scripts
+        path: /opt/kafka/src
         state: directory
         mode: '0755'
-      become: yes 
+      become: yes
 
-    - name: Change to scripts directory
-      command:
-        cmd: cd /opt/kafka/scripts
-
-    - name: Initialize npm project
+    - name: Initialize npm project in src directory
       command:
         cmd: npm init -y
-        chdir: /opt/kafka/scripts
-        creates: /opt/kafka/scripts/package.json
+        chdir: /opt/kafka/src
+        creates: /opt/kafka/src/package.json
 
-
-    - name: Install necessary npm packages for producer.js
+    - name: Install necessary npm packages for producer.ts
       npm:
-        path: /opt/kafka/scripts
+        path: /opt/kafka/src
         state: present
-        global: yes
+        global: no
         name: "{{ item }}"
       loop:
         - kafkajs
         - randomstring
         - random-mobile
         - uuid
+        - @types/node
+        - typescript
+
+    - name: Initialize TypeScript project in src directory
+      command:
+        cmd: tsc --init
+        chdir: /opt/kafka/src
+        creates: /opt/kafka/src/tsconfig.json
+
+    - name: Modify TypeScript configuration for outDir
+      lineinfile:
+        path: /opt/kafka/src/tsconfig.json
+        backrefs: yes
+        regexp: '"outDir": .+'
+        line: '"outDir": "../dist"'
+
+
+    - name: Create model.ts file (si no existe en otra parte)
+      copy:
+        dest: "/opt/kafka/src/model.ts"
+        content: |
+          export interface IEvent {
+            globalId: string;
+            event: string;
+            data: IUser;
+            createdAt: Date;
+          }
+
+          export interface IUser {
+            id: string;
+            firstName: string;
+            lastName: string;
+            country: string;
+            email: string;
+            phoneNumber?: string;
+            city: string;
+            createdAt: Date;
+          }
 
 
     - name: Create producer.js file
       copy:
-        dest: "/opt/kafka/scripts/producer.js"
+        dest: "/opt/kafka/src/producer.js"
         content: |
           import { Kafka, logLevel } from "kafkajs";
           import { IEvent, IUser } from "./model";
@@ -222,3 +266,8 @@
           };
 
           module.exports = produce;
+
+    - name: Compile TypeScript files
+      command:
+        cmd: tsc
+        chdir: /opt/kafka/src
