@@ -1,0 +1,77 @@
+- name: Install software
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install Java
+      yum:
+        name: java-11-openjdk
+        state: present
+
+    - name: Install wget
+      yum:
+        name: wget
+        state: present
+
+    - name: Check if Kafka directory exists
+      stat:
+        path: /opt/kafka_2.13-3.5.0
+      register: kafka_directory_stat
+
+    - name: Download Kafka binary
+      get_url:
+        url: https://downloads.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
+        dest: /tmp/kafka_2.13-3.5.0.tgz
+      when: not kafka_directory_stat.stat.exists
+
+    - name: Extract Kafka binary
+      unarchive:
+        src: /tmp/kafka_2.13-3.5.0.tgz
+        dest: /opt/
+        remote_src: true
+      when: not kafka_directory_stat.stat.exists
+
+    - name: Set Kafka cluster ID
+      shell:
+        cmd: |
+          KAFKA_CLUSTER_ID="$(/opt/kafka_2.13-3.5.0/bin/kafka-storage.sh random-uuid)"
+          /opt/kafka_2.13-3.5.0/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /opt/kafka_2.13-3.5.0/config/kraft/server.properties --ignore-formatted
+      register: kafka_cluster_id_result
+      changed_when: false
+
+    - name: Write Kafka systemd service file
+      copy:
+        dest: /etc/systemd/system/kafka.service
+        content: |
+          [Unit]
+          Description=Apache Kafka server
+          After=network.target
+
+          [Service]
+          Type=simple
+          Environment=KAFKA_CLUSTER_ID={{ kafka_cluster_id_result.stdout }}
+          ExecStart=/opt/kafka_2.13-3.5.0/bin/kafka-server-start.sh /opt/kafka_2.13-3.5.0/config/kraft/server.properties
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      command:
+        cmd: systemctl daemon-reload
+
+    - name: Enable and start Kafka
+      systemd:
+        name: kafka
+        state: started
+        enabled: yes
+
+    - name: Wait for Kafka to start
+      wait_for:
+        host: localhost
+        port: 9092
+        delay: 10
+        timeout: 300
+
+    - name: Create Kafka topic
+      command:
+        cmd: /opt/kafka_2.13-3.5.0/bin/kafka-topics.sh --create --topic elastic-test-replica --bootstrap-server localhost:9092
+      ignore_errors: true
