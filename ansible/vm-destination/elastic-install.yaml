@@ -1,0 +1,40 @@
+---
+- name: Install Elasticsearch and Logstash
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install Elastic repository
+      yum_repository:
+        name: elastic-8.x
+        description: Elastic repository for 8.x packages
+        baseurl: https://artifacts.elastic.co/packages/8.x/yum
+        gpgcheck: yes
+        gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        enabled: yes
+
+    - name: Install Elasticsearch
+      yum:
+        name: elasticsearch
+        state: latest
+
+    - name: Install Logstash
+      yum:
+        name: logstash
+        state: latest
+
+    - name: Enable and start Elasticsearch service
+      systemd:
+        name: elasticsearch
+        enabled: yes
+        state: started
+
+    - name: Enable and start Logstash service
+      systemd:
+        name: logstash
+        enabled: yes
+        state: started
+
+    - name: Reload systemd to pick up new services
+      systemd:
+        daemon_reload: yes
+
