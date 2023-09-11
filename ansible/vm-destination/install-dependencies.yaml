@@ -1,5 +1,6 @@
 - name: Install software
-  hosts: localhost
+
+  hosts: localhostt
   become: true
   tasks:
     - name: Install Java
